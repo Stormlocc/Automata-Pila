@@ -81,7 +81,6 @@ class ListaRec{
             System.out.println();
     }    
 }
-
 //:::::::::::::::::::::::::CLASE NODO::::::::::::::::::::::::::::::::::::::::::::::
 class Nodo{
   
@@ -194,7 +193,6 @@ class CPila{
         }
     }
 }
-  
 //:::::::::::::::::::::::::::::::CLASE GRAFO::::::::::::::::::::::::::::::::::
 class Grafo{
     //:::::::::::::::::Atributos:::::::::::::::::::::
@@ -288,12 +286,12 @@ class Grafo{
         else
             System.out.println();
     }
-}
 
+}
 
 public class AutomataSimple {
 
-    //Función para obtener siguiente estado a partir de una letra, se apilara pp y ps
+    //Función para obtener siguiente estado segun la pila y letra de cadena
     public static Object nextEst(Object letter, Grafo graph, CPila pila, Object Ea){
         if(graph.estaVacio())
             return null;
@@ -310,10 +308,10 @@ public class AutomataSimple {
                 return nextEst(letter, graph.getSubgrafo(), pila, Ea);       
         }
     }
-    
+    //Funcion que procesa el estado de la pila 
     public static boolean procsarPil(CPila pila, Nodo nod){
         System.out.print(nod.getClave());
-        //Si quiere despilar y la pila esta facia retonar fasle
+        //Si quiere desapilar y la pila esta vacia retonar fasle
         if(pila.EstaVacia() && nod.getPop().toString() != "l"){
             System.out.print(" (se acabo la pila, error pop )");
             return false;
@@ -363,7 +361,7 @@ public class AutomataSimple {
         //:::::::::::::Crear grafo:::::::::::::::
         Grafo graf = new Grafo();
         CPila pila = new CPila();
-        pila.Push("z");
+        
         //Agregar vértices
         graf.agregarVertice("q0");
         graf.agregarVertice("q1");
@@ -378,6 +376,8 @@ public class AutomataSimple {
         //Declarar Cadenas
         String[] cad1 = {"l", "a", "a", "a", "a", "b", "b", "b", "b", "l"};
         String[] cad2 = {"l", "a", "a" , "b", "b", "b", "l"};
+        String[] cad3 = {"l", "a", "a" , "a", "b", "b", "l"};
+        String[] cad4 = {"l", "a", "a" , "a", "b", "b", "b", "l"};
         
         //Mostrar grafo
         System.out.println(":::::::::::::GRAFO DE AUTÓMATA:::::::::::");
@@ -386,6 +386,7 @@ public class AutomataSimple {
         //Validar cadenas
         System.out.println(":::::::::::::VALIDAR CARDENAS:::::::::::");
         //Cadena 1
+        pila.Push("z");
         System.out.print("Cadena 1: ");
         mostrarLista(cad1);
         if(validarCad(cad1, graf, pila, "q0", "q3")){
@@ -394,14 +395,37 @@ public class AutomataSimple {
         else
             System.out.println("Cadena no válida");
         System.out.println();
+
+        //Cadena 2
         pila.LimpiarPila();
         pila.Push("z");
-        //Cadena 2
         System.out.print("Cadena 2: ");
         mostrarLista(cad2);
         if(validarCad(cad2, graf, pila, "q0", "q3")){
-            //graf.getPila().MostrarPila();   
-            //System.out.println(graf.getPila().getSubPila().getElemento());
+            System.out.println("Cadena Válida");
+        }
+        else
+            System.out.println("Cadena no válida");
+        System.out.println();
+
+        //Cadena 3
+        pila.LimpiarPila();
+        pila.Push("z");
+        System.out.print("Cadena 3: ");
+        mostrarLista(cad3);
+        if(validarCad(cad3, graf, pila, "q0", "q3")){
+            System.out.println("Cadena Válida");
+        }
+        else
+            System.out.println("Cadena no válida");
+        System.out.println();
+
+        //Cadena 4
+        pila.LimpiarPila();
+        pila.Push("z");
+        System.out.print("Cadena 4: ");
+        mostrarLista(cad4);
+        if(validarCad(cad4, graf, pila, "q0", "q3")){
             System.out.println("Cadena Válida");
         }
         else
