@@ -103,11 +103,15 @@ class Nodo{
   
     //:::::::::::Atributos:::::::::::::::::::
     private Object clave;
+    private Object pop;
+    private Object push;
     private ListaRec estados;
     //:::::::::::Constructores::::::::::::::::::
-    public Nodo(Object clave, ListaRec estados){
+    public Nodo(Object clave, Object pop, Object push){
         this.clave = clave;
-        this.estados = estados;     
+        this.estados = new ListaRec();
+        this.pop = pop;
+        this.push = push;     
     }
     public Nodo(){
         this.clave = null;
@@ -124,10 +128,17 @@ class Nodo{
     public ListaRec getEstados(){
         return estados;
     }
+    public Object getPop(){
+        return pop;
+    }
+    public Object getPush(){
+        return push;
+    }
     //::::::::::::::::::::::Métodos:::::::::::::::::::::::::
     //Mostrar nodo
     public void mostrarNodo(){
-        System.out.print(clave + " -> ");
+        String datosNodo = clave.toString() + " "+ pop.toString() + " " + push.toString();
+        System.out.print(datosNodo +" -> ");
         estados.mostrarLista();    
     }
     @Override
@@ -136,25 +147,85 @@ class Nodo{
     }       
 }
 //:::::::::::::::::::::::::CLASE PILA::::::::::::::::::::::::::::::::
-class Nodo{}
-  
+class CPila{
 
+    //::::::::::: Atributos :::::::::::::::::::
+    private Object aElemento;
+    private CPila aSubPila;
+
+    //:::::::::::: Constructores :::::::::::::::::::
+    public CPila()
+    {
+        this.aElemento = null;
+        this.aSubPila = null;
+    }
+    public CPila(Object pElemento, CPila pSubPila)
+    {
+        this.aElemento = pElemento;
+        this.aSubPila = pSubPila;
+    }
+    //:::::::::::::::::::::::Getters::::::::::::::::
+    public Object getElemento(){
+        return aElemento;
+    }
+    public CPila getSubPila(){
+        return aSubPila;
+    }
+    //::::::::::::::::::: Metodos ::::::::::::::::::
+    public boolean EstaVacia()
+    {
+        return ((aElemento == null) && (aSubPila == null));
+    }
+    //Mostrar elemento
+    public Object Cima()
+    {
+        return aElemento;
+    }
+    //Apilar
+    public void Push(Object pElemento)
+    {
+        aSubPila = new CPila(aElemento, aSubPila);
+        aElemento = pElemento;
+    }
+    //Desapilar
+    public void Pop()
+    {
+        if (!EstaVacia())
+        {
+            aElemento = getSubPila().aElemento;
+            aSubPila = getSubPila().aSubPila;
+        }
+    }
+    public void MostrarPilar(){
+        if(!EstaVacia()){
+            System.out.print( Cima() + " ");
+            Pop();
+            MostrarPilar();
+        }
+        System.out.println();
+    }
+}
+  
 //:::::::::::::::::::::::::::::::CLASE GRAFO::::::::::::::::::::::::::::::::::
 class Grafo{
     //:::::::::::::::::Atributos:::::::::::::::::::::
     private Object vertice;
     private ListaRec lista;     //Contiene objetos de tipo Nodo
     private Grafo subgrafo;
+    private CPila pila;
     //::::::::::::::::::::Constructores::::::::::::::::::
     public Grafo(){
         this.lista = null;
         this.vertice = null;
         this.subgrafo = null;
+        this.pila = new CPila();  
+        pila.Push("z");     
     }
-    public Grafo(Object vertice, ListaRec lista, Grafo subgrafo){
+    public Grafo(Object vertice, ListaRec lista, Grafo subgrafo, CPila pila){
         this.vertice = vertice;
         this.lista = lista;
         this.subgrafo = subgrafo;
+        this.pila = pila;
     }
     //::::::::::::::::::::::::Getters:::::::::::::::::::::::
     public Object getVertice(){
@@ -165,6 +236,9 @@ class Grafo{
     }
     public Grafo getSubgrafo(){
         return subgrafo;
+    }
+    public CPila getPila(){
+        return pila;
     }
     
     //:::::::::::::::::::::::::Setters::::::::::::::::::::::
@@ -206,18 +280,18 @@ class Grafo{
             agregVert(V);
     }
     //Agregar arco
-    public void agregarArco(Object Vo, Object Vd, Object clave){
+    public void agregarArco(Object Vo, Object Vd, Object clave, Object pop, Object push){
         if(!estaVacio()){
             if(vertice.toString().equals(Vo.toString())){
                 if(lista.Existe(clave))
                     lista.obtenerNodo(clave).getEstados().Agregar(Vd);
                 else{
-                    lista.Agregar(new Nodo(clave));
+                    lista.Agregar(new Nodo(clave,pop,push));
                     lista.obtenerNodo(clave).getEstados().Agregar(Vd);
                 }        
             }
             else
-                subgrafo.agregarArco(Vo, Vd, clave);  
+                subgrafo.agregarArco(Vo, Vd, clave, pop, push);  
         }
         else
             System.out.println("No se agregó el arco");    
@@ -234,6 +308,8 @@ class Grafo{
     }
     
 }
+
+
 public class AutomataSimple {
 
     /**
@@ -245,14 +321,28 @@ public class AutomataSimple {
             return null;
         else{
             if(graph.getVertice().toString().equals(Ei.toString())){
-                if(graph.getLista().Existe(letter))
-                    return graph.getLista().obtenerNodo(letter)
-                    .getEstados().obtenerIesimo(1);
+                if(graph.getLista().Existe(letter)){
+                    Nodo nod = (Nodo)graph.getLista().obtenerNodo(letter);
+                    System.out.print(nod.getClave());
+                    //Desapilar
+                    if ( nod.getPop() != "l"){
+                        System.out.print("(pop: " + nod.getPop() + " -");
+                        graph.getPila().Pop();
+                    }else{ System.out.print("(pop: _ ");}
+                    //Apilar
+                    if (nod.getPush() != "l"){
+                        System.out.print(" push: " + nod.getPush() + " )");
+                        graph.getPila().Push(nod.getPush());
+                    }else{ System.out.print("push: _ )");}
+                    //Verificar estado de pila
+                    //System.out.print("(Elemento de pila: " + graph.getPila().Cima() + " )");
+                    return graph.getLista().obtenerNodo(letter).getEstados().obtenerIesimo(1);
+                }
                 else
                     return null;
             }
             else
-                return nextEst(letter,graph.getSubgrafo(),Ei);       
+                return nextEst(letter, graph.getSubgrafo(), Ei);       
         }
     }
     //Función para validar una cadena
@@ -289,42 +379,35 @@ public class AutomataSimple {
         graf.agregarVertice("q2");
         graf.agregarVertice("q3");
         //Agregar arcos
-        graf.agregarArco("q0", "q1", 1);
-        graf.agregarArco("q1", "q1", 0);
-        graf.agregarArco("q1", "q3", 1);
-        graf.agregarArco("q3", "q1", 1);
-        graf.agregarArco("q3", "q2", 0);
+        graf.agregarArco("q0", "q1", "l", "z", "z");        //Iniciando automata
+        graf.agregarArco("q1", "q1", "a", "l", "a");
+        graf.agregarArco("q1", "q2", "b", "a", "l");
+        graf.agregarArco("q2", "q3", "l", "z", "l");
+        graf.agregarArco("q2", "q2", "b", "a", "l");        //Terminando automata
         //Declarar Cadenas
-        String[] cad1 = {"1", "0", "0", "0", "0","0" ,"0", "1"};
-        String[] cad2 = {"1", "0", "0","1", "1"};
-        String[] cad3 = {"1", "0", "0", "0", "0","1" ,"0", "1", "1"};
+        String[] cad1 = {"l", "a", "a", "a", "a", "b", "b", "b", "b", "l"};
+        String[] cad2 = {"l", "a", "a", "a" ,"b", "b", "l"};
         //Mostrar grafo
         System.out.println(":::::::::::::GRAFO DE AUTÓMATA:::::::::::");
         graf.MostrarGrafo();
+
         //::::::::::::::::::::::VALIDAR CADENAS:::::::::::::::::::::
         //Cadena 1
         System.out.print("Cadena 1: ");
         mostrarLista(cad1);
         if(validarCad(cad1, graf, "q0", "q3"))
-            System.out.println("Cadena Válida");
+        System.out.println("Cadena Válida");
         else
-            System.out.println("Cadena no válida");
+        System.out.println("Cadena no válida");
         System.out.println();
+
         //Cadena 2
         System.out.print("Cadena 2: ");
         mostrarLista(cad2);
         if(validarCad(cad2, graf, "q0", "q3"))
-            System.out.println("Cadena Válida");
+        System.out.println("Cadena Válida");
         else
-            System.out.println("Cadena no válida");
-        System.out.println();
-        //Cadena 3
-        System.out.println("Cadena 3: ");
-        mostrarLista(cad3);
-        if(validarCad(cad3, graf, "q0", "q3"))
-            System.out.println("Cadena Válida");
-        else
-            System.out.println("Cadena no válida");
+        System.out.println("Cadena no válida");
         System.out.println();
     }
     
